@@ -1,50 +1,30 @@
-// Base de datos simulada en memoria
-let saludos = [
-  { id: 1, nombre: 'Joaquin', mensaje: 'Hola Joaquin!' },
-  { id: 2, nombre: 'Profe',   mensaje: 'Hola Profe!'   }
-];
+const service = require('../services/saludo.service');
 
-// GET /api/saludo
 exports.getAll = (req, res) => {
-  res.json(saludos);
+  res.json(service.getAll());
 };
 
-// GET /api/saludo/:id
 exports.getById = (req, res) => {
-  const item = saludos.find(s => s.id === parseInt(req.params.id));
+  const item = service.getById(req.params.id);
   if (!item) return res.status(404).json({ error: 'No encontrado' });
   res.json(item);
 };
 
-// POST /api/saludo
 exports.create = (req, res) => {
   const { nombre } = req.body;
   if (!nombre) return res.status(400).json({ error: 'Falta el campo nombre' });
-
-  const nuevo = {
-    id: saludos.length + 1,
-    nombre,
-    mensaje: `Hola, ${nombre}!`
-  };
-  saludos.push(nuevo);
-  res.status(201).json(nuevo);
+  res.status(201).json(service.create(nombre));
 };
 
-// PUT /api/saludo/:id
 exports.update = (req, res) => {
-  const index = saludos.findIndex(s => s.id === parseInt(req.params.id));
-  if (index === -1) return res.status(404).json({ error: 'No encontrado' });
-
   const { nombre } = req.body;
-  saludos[index] = { ...saludos[index], nombre, mensaje: `Hola, ${nombre}!` };
-  res.json(saludos[index]);
+  const item = service.update(req.params.id, nombre);
+  if (!item) return res.status(404).json({ error: 'No encontrado' });
+  res.json(item);
 };
 
-// DELETE /api/saludo/:id
 exports.remove = (req, res) => {
-  const index = saludos.findIndex(s => s.id === parseInt(req.params.id));
-  if (index === -1) return res.status(404).json({ error: 'No encontrado' });
-
-  saludos.splice(index, 1);
+  const ok = service.remove(req.params.id);
+  if (!ok) return res.status(404).json({ error: 'No encontrado' });
   res.json({ mensaje: 'Eliminado correctamente' });
 };
